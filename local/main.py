@@ -49,7 +49,7 @@ def ask_llm_with_context(query: str, vector_store, k: int = 3) -> str:
 
     Based on the above, respond to the user's request in a clear and helpful way.
     """
-    llm = ChatVertexAI(model="gemini-1.5-flash-001",
+    llm = ChatVertexAI(model="gemini-2.0-flash-001",
                         temperature=0,
                         max_tokens=None,
                         max_retries=6,
