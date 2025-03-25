@@ -60,6 +60,7 @@ def ask_llm_with_context(query: str, vector_store, k: int = 3) -> str:
 
     return ai_msg.content.strip()
 
+""""
 def search_similar_docs(vector_store: QdrantVectorStore, 
                         query: str, 
                         k: int = 3):
@@ -68,7 +69,7 @@ def search_similar_docs(vector_store: QdrantVectorStore,
     for i, doc in enumerate(results, 1):
         print(f"{i}. {doc.page_content[:150]}...")
         print(f"   Metadata: {doc.metadata}\n")
-
+"""
 
 if __name__ == "__main__":
     collection_name = "TGDD_collection"  
