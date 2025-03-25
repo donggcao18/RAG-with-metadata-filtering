@@ -4,17 +4,27 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from langchain.schema import Document
 from google.cloud import aiplatform
-import os
+import time
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"F:\GitHub\RAG-with-metadata-filtering\key\teak-kit-453818-e0-a28e80210053.json"
+from document_processing import TGDD_load_laptops_and_descriptions
+
+"""
+Thing need to be done: 
+- (check) populate vector database function
+- (uncheck) vector database with metadata filtering and hybrid searchh
+"""
+
 aiplatform.init(project="teak-kit-453818-e0", location="us-central1")
+"""
+User need to set up environment variable GOOGLE_APPLICATION_CREDENTIALS to the path of the service account key
+"""
 
 def populate_vector_db_secure(docs: list[Document],
                                 embedding_model_name: str = "textembedding-gecko-multilingual@001",
-                                collection_name: str = "demo_collection",
-                                persist_path: str = r"F:\GitHub\RAG-with-metadata-filtering\vector-store"
-                            ) -> QdrantVectorStore:
-
+                                
+                                persist_path: str = r"F:\GitHub\RAG-with-metadata-filtering\vector-store\test_collection",
+                                collection_name: str = "test_collection") -> QdrantVectorStore:
+    sleep_between_batches = 60
     embeddings = VertexAIEmbeddings(model=embedding_model_name)
     test_vector = embeddings.embed_query("This is a test.")
     vector_dim = len(test_vector)
@@ -29,6 +39,17 @@ def populate_vector_db_secure(docs: list[Document],
                                     collection_name=collection_name,
                                     embedding=embeddings,
                                     retrieval_mode=RetrievalMode.DENSE)
+    BATCH_SIZE = 5
+    for i in range(0, len(docs), BATCH_SIZE):
+        batch = docs[i:i + BATCH_SIZE]
+        try:
+            vector_store.add_documents(documents=batch)
+            if sleep_between_batches > 0:
+                time.sleep(sleep_between_batches) 
+                print(f"Embed {i} data points")
+        except Exception as e:
+            print(f"Failed to embed batch {i}-{i + BATCH_SIZE}: {e}")
+            continue
 
     vector_store.add_documents(documents=docs)
 
@@ -106,5 +127,16 @@ documents = [
     document_9,
     document_10,
 ]
-vector_store = populate_vector_db_secure(docs=documents)
+vector_store = populate_vector_db_secure(docs=documents, collection_name="test_collection")
 display_search_similar_docs(vector_store, "lập trình viên", k=2)
+
+#create TGDD vector database
+LAPTOP_CSV_PATH = "data/TGDD/laptop.csv"
+DESCRIPTION_CSV_PATH = "data/TGDD/description.csv"
+TGDD_document = TGDD_load_laptops_and_descriptions (LAPTOP_CSV_PATH, 
+                                                    DESCRIPTION_CSV_PATH)
+
+TGDD_vector_store = populate_vector_db_secure(docs=TGDD_document, 
+                                              collection_name="TGDD_collection",
+                                              persist_path=r"F:\GitHub\RAG-with-metadata-filtering\vector-store\TGDD_collection")
+display_search_similar_docs(TGDD_vector_store, "laptop ASUS giá rẻ", k=2)

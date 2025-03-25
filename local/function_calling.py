@@ -6,6 +6,14 @@ from langchain_qdrant import QdrantVectorStore
 from typing import List
 import re
 
+"""
+Thing need to be done: different tools for multiple purposes
+- (check) filter by metadata
+- (check) semantic_search_on_ids
+- (uncheck) filter promotion packages
+- (uncheck) improve reasoning for agent
+"""
+
 def parse_price(price_str: str) -> float:
     """Utility to convert price string like '14990000' to float."""
     price_clean = re.sub(r"[^\d.]", "", price_str)
@@ -55,4 +63,4 @@ agent = initialize_agent(
     verbose=True,
 )
 
-agent.run("Find ASUS laptops under $1000 and tell me the best one.")
+#agent.run("")
