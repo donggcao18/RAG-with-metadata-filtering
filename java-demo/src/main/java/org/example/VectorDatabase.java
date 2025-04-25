@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import java.io.IOException;
 import java.util.*;
 
-import org.example.EmbedModel;
 
 public class VectorDatabase {
     private VectorStore vectorStore;
@@ -70,5 +69,16 @@ public class VectorDatabase {
                 continue;
             }
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        String storeName = "laptop";
+        VectorDatabase vectorStore = new VectorDatabase(storeName);
+
+        List<Document> documents = List.of(
+                new Document("Spring AI rocks!! Spring AI rocks!! Spring AI rocks!! Spring AI rocks!! Spring AI rocks!!", Map.of("meta1", "meta1")),
+                new Document("The World is Big and Salvation Lurks Around the Corner"),
+                new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
+        vectorStore.addToQdrant(documents);
     }
 }

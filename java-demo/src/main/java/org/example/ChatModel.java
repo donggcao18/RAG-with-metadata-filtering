@@ -21,7 +21,18 @@ public class ChatModel {
 
         this.chatModel =  VertexAiGeminiChatModel.builder()
                 	.vertexAI(vertexApi)
-                    .vertexAiGeminiChatOptions(options)
                     .build();
+    }
+
+    public VertexAiGeminiChatModel getChatModel() {
+        return this.chatModel;
+    }
+
+    public static void main(String[] args) {
+        String projectId = System.getenv("GOOGLE_CLOUD_PROJECT_ID");
+        String location = System.getenv("GOOGLE_CLOUD_LOCATION");
+
+        ChatModel chatModel = new ChatModel(projectId, location);
+        System.out.println("Chat model initialized successfully.");
     }
 }

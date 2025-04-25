@@ -13,11 +13,11 @@ import org.springframework.ai.vertexai.embedding.text.VertexAiTextEmbeddingOptio
 import java.io.IOException;
 import java.util.List;
 
+// using command setx VARIABLE_NAME "VALUE"
 public class EmbedModel {
     private final VertexAiTextEmbeddingModel embeddingModel;
 
     public EmbedModel() throws IOException {
-        // Load Google credentials from environment variable
         String credentialsJson = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
         GoogleCredentials credentials = GoogleCredentials
@@ -28,7 +28,7 @@ public class EmbedModel {
 
         String endpoint = System.getenv("VERTEX_AI_ENDPOINT");
         if (endpoint == null) {
-            endpoint = "us-central1-aiplatform.googleapis.com";
+            endpoint = "us-central1-aiplatform.googleapis.com:443";
         }
 
         VertexAiEmbeddingConnectionDetails connectionDetails = VertexAiEmbeddingConnectionDetails.builder()
@@ -56,5 +56,23 @@ public class EmbedModel {
 
     public EmbeddingResponse getEmbeddings(List<String> texts) {
         return this.embeddingModel.embedForResponse(texts);
+    }
+    public static void main(String[] args) throws IOException {
+        System.out.println("Checking environment variables:");
+        System.out.println("GOOGLE_APPLICATION_CREDENTIALS: " + System.getenv("GOOGLE_APPLICATION_CREDENTIALS"));
+        System.out.println("VERTEX_AI_GEMINI_PROJECT_ID: " + System.getenv("VERTEX_AI_GEMINI_PROJECT_ID"));
+        System.out.println("VERTEX_AI_GEMINI_LOCATION: " + System.getenv("VERTEX_AI_GEMINI_LOCATION"));
+
+        EmbedModel embedModel = new EmbedModel();
+        List<String> texts = List.of("Hello world", "This is a test");
+        EmbeddingResponse response = embedModel.getEmbeddings(texts);
+
+        System.out.println("\nEmbedding Response:");
+        System.out.println("Number of embeddings: " + response.getResults().size());
+        for (int i = 0; i < response.getResults().size(); i++) {
+            System.out.println("\nText " + i + ": " + texts.get(i));
+            System.out.println("Embedding dimension: " + response.getResults().get(i).getOutput());
+            System.out.println("View embedding" + response.getResults().get(i).getOutput());
+        }
     }
 }

@@ -20,7 +20,7 @@ public class QuestionAdviser {
                     similarityThreshold(0.8d).
                     topK(6).
                     build());
-
+    String userText = "What is the best laptop for gaming?";
     ChatResponse response = ChatClient.builder(chatModel)
             .build().prompt()
             .advisors(new QuestionAnswerAdvisor(vectorStore))
