@@ -2,6 +2,8 @@ package org.example;
 
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.QdrantGrpcClient;
+import io.qdrant.client.grpc.Collections.Distance;
+import io.qdrant.client.grpc.Collections.VectorParams;
 
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.qdrant.QdrantVectorStore;
@@ -12,12 +14,13 @@ import org.springframework.context.annotation.Bean;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 
 public class VectorDatabase {
     private VectorStore vectorStore;
-    @Bean
-    public QdrantClient createQdrantClient() {
+
+    public QdrantClient createQdrantClient(String StoreName) throws ExecutionException, InterruptedException {
         String hostname = "localhost";
         int port = 6334;
         boolean isTls = false;
@@ -28,12 +31,24 @@ public class VectorDatabase {
         if (apiKey != null && !apiKey.isEmpty()) {
             grpcClientBuilder.withApiKey(apiKey);
         }
+        QdrantClient client = new QdrantClient(grpcClientBuilder.build());
 
-        return new QdrantClient(grpcClientBuilder.build());
+        try {
+            client.createCollectionAsync(StoreName,
+                    VectorParams.newBuilder()
+                            .setDistance(Distance.Cosine)
+                            .setSize(768)
+                            .build()).get();
+        } catch (Exception e) {
+            System.out.println("Collection may already exist: " + e.getMessage());
+        }
+        return client;
     }
 
-    @Bean
-    public VectorStore vectorStore(QdrantClient qdrantClient, EmbeddingModel embeddingModel, String StoreName) {
+    public VectorStore vectorStore(QdrantClient qdrantClient,
+                                   EmbeddingModel embeddingModel,
+                                   String StoreName){
+
         return QdrantVectorStore.builder(qdrantClient, embeddingModel)
                 .collectionName(StoreName)
                 .initializeSchema(true)
@@ -41,14 +56,14 @@ public class VectorDatabase {
                 .build();
     }
 
-    public VectorDatabase(String StoreName) throws IOException {
-        QdrantClient qClient = createQdrantClient();
+    public VectorDatabase(String StoreName) throws IOException, ExecutionException, InterruptedException {
+        QdrantClient qClient = createQdrantClient(StoreName);
         EmbedModel eModel = new EmbedModel();
         this.vectorStore = vectorStore(qClient, eModel.getEmbeddingModel(), StoreName);
     }
 
     public void addToQdrant(List<Document> documents) {
-        final int BATCH_SIZE = 5;
+        final int BATCH_SIZE = 1;
 
         for (int i = 0; i < documents.size(); i += BATCH_SIZE) {
             int endIndex = Math.min(i + BATCH_SIZE, documents.size());
@@ -71,7 +86,7 @@ public class VectorDatabase {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         String storeName = "laptop";
         VectorDatabase vectorStore = new VectorDatabase(storeName);
 
