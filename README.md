@@ -24,12 +24,14 @@ docker run -p 6333:6333 -p 6334:6334 \
 | `VERTEX_AI_GEMINI_PROJECT_ID` | **GCP project ID** that hosts Vertex AI |
 | `VERTEX_AI_GEMINI_LOCATION`  | Region where Gemini / embeddings are available (`us‑central1`, `europe‑west4`, …) |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Absolute path to your **service‑account key** JSON file (must have *Vertex AI User* + *Storage Object Viewer* roles) |
+|VERTEX_AI_GEMINI_STORE_NAME | Name of your store |
 
 ```bash
 # PowerShell
 setx VERTEX_AI_GEMINI_PROJECT_ID "my‑gcp‑project"
 setx VERTEX_AI_GEMINI_LOCATION "us‑central1"
 setx GOOGLE_APPLICATION_CREDENTIALS "C:\\keys\\vertex‑sa.json"
+setx VERTEX_AI_GEMINI_STORE_NAME "store-name"
 ```
 > **IDE users:** put the same key/value pairs in the Run‑Configuration → *Environment variables* box.
 
