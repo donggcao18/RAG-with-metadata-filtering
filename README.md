@@ -37,11 +37,6 @@ setx VERTEX_AI_GEMINI_STORE_NAME "store-name"
 
 ---
 
-### 3  Build & run (Java src)
-```bash
-./mvnw clean package
-```
-
 
 ## Cleaning up
 ```bash
